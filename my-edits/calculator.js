@@ -10,6 +10,12 @@ window.addEventListener('DOMContentLoaded', function() {
 });
 
 function getCurrentUIValues() {
+    if (document.getElementById("loan-amount").value < 0
+    || document.getElementById("loan-years").value < 0
+    || document.getElementById("loan-rate").value < 0) {
+        alert('Please enter only positive values.');
+        location.reload()
+    }
   return {
     amount: +(document.getElementById("loan-amount").value),
     years: +(document.getElementById("loan-years").value),
@@ -27,13 +33,14 @@ function setupIntialValues() {
     loanAmount.defaultValue = '500000';
     term.defaultValue = '30';
     yearlyRate.defaultValue = '6.5';
-    updateMonthly();
+    update();
 }
 
 // Get the current values from the UI
 // Update the monthly payment
 function update() {
-    updateMonthly()
+    let currentValues = getCurrentUIValues();
+    updateMonthly(calculateMonthlyPayment(currentValues));
 }
 
 // Given an object of values (a value has amount, years and rate ),
@@ -43,7 +50,12 @@ function calculateMonthlyPayment(values) {
     let p = values.amount;
     let i = (values.rate/100)/12;
     let n = values.years*12;
-    let payment = ((p*i)/(1-Math.pow((1+i), -n))).toFixed(2);
+    let payment = 0
+    if(values.rate > 0) {
+        payment = ((p*i)/(1-Math.pow((1+i), -n))).toFixed(2);
+    } else {
+        payment = (p/n).toFixed(2);
+    }
     return payment;
 }
 
@@ -51,5 +63,5 @@ function calculateMonthlyPayment(values) {
 // update the UI to show the value.
 function updateMonthly(monthly) {
     let monthlyPayment = document.querySelector('#monthly-payment');
-    monthlyPayment.innerText = '$' + calculateMonthlyPayment(getCurrentUIValues())
+    monthlyPayment.innerText = '$' + monthly
 }
